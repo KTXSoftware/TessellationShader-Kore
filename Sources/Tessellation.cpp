@@ -92,16 +92,16 @@ int kore(int argc, char** argv) {
 	vertexShader = new Shader(vs.readAll(), vs.size(), VertexShader);
 	fragmentShader = new Shader(fs.readAll(), fs.size(), FragmentShader);
 	geometryShader = new Shader(gs.readAll(), gs.size(), GeometryShader);
-	tessEvalShader = new Shader(tese.readAll(), tese.size(), TesselationEvaluationShader);
-	tessControlShader = new Shader(tesc.readAll(), tesc.size(), TesselationControlShader);
+	tessEvalShader = new Shader(tese.readAll(), tese.size(), TessellationEvaluationShader);
+	tessControlShader = new Shader(tesc.readAll(), tesc.size(), TessellationControlShader);
 	VertexStructure structure;
 	structure.add("Position", Float3VertexData);
 	program = new Program;
 	program->setVertexShader(vertexShader);
 	program->setFragmentShader(fragmentShader);
 	program->setGeometryShader(geometryShader);
-	program->setTesselationEvaluationShader(tessEvalShader);
-	program->setTesselationControlShader(tessControlShader);
+	program->setTessellationEvaluationShader(tessEvalShader);
+	program->setTessellationControlShader(tessControlShader);
 	program->link(structure);
 
 	tessLevelInnerLocation = program->getConstantLocation("TessLevelInner");
