@@ -44,7 +44,7 @@ namespace {
 		Graphics::setFloat(tessLevelInnerLocation, tessLevelInner);
 		Graphics::setFloat(tessLevelOuterLocation, tessLevelOuter);
 		Graphics::setFloat3(lightPositionLocation, 0.25f, 0.25f, 1.0f);
-		Graphics::setMatrix(projectionLocation, mat4::Perspective(60, width / height, 5, 150));
+        Graphics::setMatrix(projectionLocation, mat4::Perspective(Kore::pi / 3, width / height, 5, 150));
 		
 		mat4 rotation = mat4::RotationX((float)System::time());
 		vec3 eyePosition(0.0f, 0.0f, -8.0f);
