@@ -1,7 +1,7 @@
 #include "pch.h"
 #include <Kore/IO/FileReader.h>
-#include <Kore/Graphics/Graphics.h>
-#include <Kore/Graphics/Shader.h>
+#include <Kore/Graphics4/Graphics.h>
+#include <Kore/Graphics4/Shader.h>
 #include <Kore/Math/Matrix.h>
 #include <Kore/System.h>
 #include <limits>
@@ -9,23 +9,23 @@
 using namespace Kore;
 
 namespace {
-	Shader* vertexShader;
-	Shader* fragmentShader;
-	Shader* geometryShader;
-	Shader* tessEvalShader;
-	Shader* tessControlShader;
-	Program* program;
-	VertexBuffer* vertices;
-	IndexBuffer* indices;
+	Graphics4::Shader* vertexShader;
+	Graphics4::Shader* fragmentShader;
+	Graphics4::Shader* geometryShader;
+	Graphics4::Shader* tessEvalShader;
+	Graphics4::Shader* tessControlShader;
+	Graphics4::Program* program;
+	Graphics4::VertexBuffer* vertices;
+	Graphics4::IndexBuffer* indices;
 
-	ConstantLocation tessLevelInnerLocation;
-	ConstantLocation tessLevelOuterLocation;
-	ConstantLocation lightPositionLocation;
-	ConstantLocation projectionLocation;
-	ConstantLocation modelviewLocation;
-	ConstantLocation normalMatrixLocation;
-	ConstantLocation ambientMaterialLocation;
-	ConstantLocation diffuseMaterialLocation;
+	Graphics4::ConstantLocation tessLevelInnerLocation;
+	Graphics4::ConstantLocation tessLevelOuterLocation;
+	Graphics4::ConstantLocation lightPositionLocation;
+	Graphics4::ConstantLocation projectionLocation;
+	Graphics4::ConstantLocation modelviewLocation;
+	Graphics4::ConstantLocation normalMatrixLocation;
+	Graphics4::ConstantLocation ambientMaterialLocation;
+	Graphics4::ConstantLocation diffuseMaterialLocation;
 
 	float tessLevelInner = 3;
 	float tessLevelOuter = 2;
@@ -33,18 +33,18 @@ namespace {
 	float height = 768;
 
 	void update() {
-		Graphics::begin();
-		Graphics::clear(Graphics::ClearColorFlag | Graphics::ClearDepthFlag);
-		Graphics::setRenderState(Kore::DepthTest, true);
+		Graphics4::begin();
+		Graphics4::clear(Graphics4::ClearColorFlag | Graphics4::ClearDepthFlag);
+		Graphics4::setRenderState(Kore::Graphics4::DepthTest, true);
 
 		program->set();
-		Graphics::setVertexBuffer(*vertices);
-		Graphics::setIndexBuffer(*indices);
+		Graphics4::setVertexBuffer(*vertices);
+		Graphics4::setIndexBuffer(*indices);
 		
-		Graphics::setFloat(tessLevelInnerLocation, tessLevelInner);
-		Graphics::setFloat(tessLevelOuterLocation, tessLevelOuter);
-		Graphics::setFloat3(lightPositionLocation, 0.25f, 0.25f, 1.0f);
-        Graphics::setMatrix(projectionLocation, mat4::Perspective(Kore::pi / 3, width / height, 5, 150));
+		Graphics4::setFloat(tessLevelInnerLocation, tessLevelInner);
+		Graphics4::setFloat(tessLevelOuterLocation, tessLevelOuter);
+		Graphics4::setFloat3(lightPositionLocation, 0.25f, 0.25f, 1.0f);
+        Graphics4::setMatrix(projectionLocation, mat4::Perspective(Kore::pi / 3, width / height, 5, 150));
 		
 		mat4 rotation = mat4::RotationX((float)System::time());
 		vec3 eyePosition(0.0f, 0.0f, -8.0f);
@@ -53,16 +53,16 @@ namespace {
 		mat4 lookAt = mat4::lookAt(eyePosition, targetPosition, upVector);
 		mat4 modelviewMatrix = lookAt * rotation;
 		mat3 normalMatrix(modelviewMatrix.Transpose3x3());
-		Graphics::setMatrix(modelviewLocation, modelviewMatrix);
-		Graphics::setMatrix(normalMatrixLocation, normalMatrix);
+		Graphics4::setMatrix(modelviewLocation, modelviewMatrix);
+		Graphics4::setMatrix(normalMatrixLocation, normalMatrix);
 		
-		Graphics::setFloat3(ambientMaterialLocation, 0.04f, 0.04f, 0.04f);
-		Graphics::setFloat3(diffuseMaterialLocation, 0.0f, 0.75f, 0.75f);
+		Graphics4::setFloat3(ambientMaterialLocation, 0.04f, 0.04f, 0.04f);
+		Graphics4::setFloat3(diffuseMaterialLocation, 0.0f, 0.75f, 0.75f);
 
-		Graphics::drawIndexedVertices();
+		Graphics4::drawIndexedVertices();
 
-		Graphics::end();
-		Graphics::swapBuffers();
+		Graphics4::end();
+		Graphics4::swapBuffers();
 	}
 }
 
@@ -89,14 +89,14 @@ int kore(int argc, char** argv) {
 	FileReader gs("test.geom");
 	FileReader tese("test.tese");
 	FileReader tesc("test.tesc");
-	vertexShader = new Shader(vs.readAll(), vs.size(), VertexShader);
-	fragmentShader = new Shader(fs.readAll(), fs.size(), FragmentShader);
-	geometryShader = new Shader(gs.readAll(), gs.size(), GeometryShader);
-	tessEvalShader = new Shader(tese.readAll(), tese.size(), TessellationEvaluationShader);
-	tessControlShader = new Shader(tesc.readAll(), tesc.size(), TessellationControlShader);
-	VertexStructure structure;
-	structure.add("Position", Float3VertexData);
-	program = new Program;
+	vertexShader = new Graphics4::Shader(vs.readAll(), vs.size(), Graphics4::VertexShader);
+	fragmentShader = new Graphics4::Shader(fs.readAll(), fs.size(), Graphics4::FragmentShader);
+	geometryShader = new Graphics4::Shader(gs.readAll(), gs.size(), Graphics4::GeometryShader);
+	tessEvalShader = new Graphics4::Shader(tese.readAll(), tese.size(), Graphics4::TessellationEvaluationShader);
+	tessControlShader = new Graphics4::Shader(tesc.readAll(), tesc.size(), Graphics4::TessellationControlShader);
+	Graphics4::VertexStructure structure;
+	structure.add("Position", Graphics4::Float3VertexData);
+	program = new Graphics4::Program;
 	program->setVertexShader(vertexShader);
 	program->setFragmentShader(fragmentShader);
 	program->setGeometryShader(geometryShader);
@@ -114,7 +114,7 @@ int kore(int argc, char** argv) {
 	diffuseMaterialLocation = program->getConstantLocation("DiffuseMaterial");
 
 	{
-		vertices = new VertexBuffer(12, structure);
+		vertices = new Graphics4::VertexBuffer(12, structure);
 		float* data = vertices->lock();
 		int i = 0;
 
@@ -135,7 +135,7 @@ int kore(int argc, char** argv) {
 	}
 
 	{
-		indices = new IndexBuffer(20 * 3);
+		indices = new Graphics4::IndexBuffer(20 * 3);
 		int i = 0;
 		int* data = indices->lock();
 
