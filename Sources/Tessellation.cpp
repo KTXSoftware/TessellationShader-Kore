@@ -104,6 +104,8 @@ int kore(int argc, char** argv) {
 	pipeline->tessellationControlShader = tessControlShader;
     pipeline->inputLayout[0] = &structure;
     pipeline->inputLayout[1] = nullptr;
+    pipeline->depthWrite = true;
+    pipeline->depthMode = Graphics4::ZCompareMode::ZCompareLess;
 	pipeline->compile();
 
 	tessLevelInnerLocation = pipeline->getConstantLocation("TessLevelInner");
