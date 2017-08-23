@@ -1,6 +1,7 @@
 #include "pch.h"
 #include <Kore/IO/FileReader.h>
 #include <Kore/Graphics4/Graphics.h>
+#include <Kore/Graphics4/PipelineState.h>
 #include <Kore/Graphics4/Shader.h>
 #include <Kore/Math/Matrix.h>
 #include <Kore/System.h>
@@ -14,7 +15,7 @@ namespace {
 	Graphics4::Shader* geometryShader;
 	Graphics4::Shader* tessEvalShader;
 	Graphics4::Shader* tessControlShader;
-	Graphics4::Program* program;
+	Graphics4::PipelineState* pipeline;
 	Graphics4::VertexBuffer* vertices;
 	Graphics4::IndexBuffer* indices;
 
@@ -35,9 +36,8 @@ namespace {
 	void update() {
 		Graphics4::begin();
 		Graphics4::clear(Graphics4::ClearColorFlag | Graphics4::ClearDepthFlag);
-		Graphics4::setRenderState(Kore::Graphics4::DepthTest, true);
 
-		program->set();
+		Graphics4::setPipeline(pipeline);
 		Graphics4::setVertexBuffer(*vertices);
 		Graphics4::setIndexBuffer(*indices);
 		
@@ -96,22 +96,24 @@ int kore(int argc, char** argv) {
 	tessControlShader = new Graphics4::Shader(tesc.readAll(), tesc.size(), Graphics4::TessellationControlShader);
 	Graphics4::VertexStructure structure;
 	structure.add("Position", Graphics4::Float3VertexData);
-	program = new Graphics4::Program;
-	program->setVertexShader(vertexShader);
-	program->setFragmentShader(fragmentShader);
-	program->setGeometryShader(geometryShader);
-	program->setTessellationEvaluationShader(tessEvalShader);
-	program->setTessellationControlShader(tessControlShader);
-	program->link(structure);
+	pipeline = new Graphics4::PipelineState();
+	pipeline->vertexShader = vertexShader;
+	pipeline->fragmentShader = fragmentShader;
+	pipeline->geometryShader = geometryShader;
+	pipeline->tessellationEvaluationShader = tessEvalShader;
+	pipeline->tessellationControlShader = tessControlShader;
+    pipeline->inputLayout[0] = &structure;
+    pipeline->inputLayout[1] = nullptr;
+	pipeline->compile();
 
-	tessLevelInnerLocation = program->getConstantLocation("TessLevelInner");
-	tessLevelOuterLocation = program->getConstantLocation("TessLevelOuter");
-	lightPositionLocation = program->getConstantLocation("LightPosition");
-	projectionLocation = program->getConstantLocation("Projection");
-	modelviewLocation = program->getConstantLocation("Modelview");
-	normalMatrixLocation = program->getConstantLocation("NormalMatrix");
-	ambientMaterialLocation = program->getConstantLocation("AmbientMaterial");
-	diffuseMaterialLocation = program->getConstantLocation("DiffuseMaterial");
+	tessLevelInnerLocation = pipeline->getConstantLocation("TessLevelInner");
+	tessLevelOuterLocation = pipeline->getConstantLocation("TessLevelOuter");
+	lightPositionLocation = pipeline->getConstantLocation("LightPosition");
+	projectionLocation = pipeline->getConstantLocation("Projection");
+	modelviewLocation = pipeline->getConstantLocation("Modelview");
+	normalMatrixLocation = pipeline->getConstantLocation("NormalMatrix");
+	ambientMaterialLocation = pipeline->getConstantLocation("AmbientMaterial");
+	diffuseMaterialLocation = pipeline->getConstantLocation("DiffuseMaterial");
 
 	{
 		vertices = new Graphics4::VertexBuffer(12, structure);
